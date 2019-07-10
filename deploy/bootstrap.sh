@@ -1,14 +1,16 @@
 # Update the apt package manager
-apt-get update
+sudo apt-get update
+
+# Install Nginx
+sudo apt-get -y install nginx
 
 # Install the python-git client for salt to get the config from the repo
 sudo apt-get -y install python-git
 
-#install basic tools
+# Install Basic Tools
 sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" install git
 
-
-# Install Go
+# Install Go [v1.9.1]
 sudo apt-get remove gccgo-go
 curl -O https://storage.googleapis.com/golang/go1.9.1.linux-amd64.tar.gz
 tar -xvf go1.9.1.linux-amd64.tar.gz
