@@ -1,0 +1,10 @@
+file_client: local
+
+fileserver_backend:
+    - roots
+    - git
+
+gitfs_base: develop
+
+gitfs_remotes:
+    - https://github.com/dhruvp-8/python-deploy-formula.git
