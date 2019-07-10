@@ -5,6 +5,9 @@
 .*.sw?
 *~
 
+# Remove Vagrant bash_profile
+**.bash_profile
+
 # Vagrant stuff
 **/deploy/acceptance_config.yml
 **/deploy/boxes/*

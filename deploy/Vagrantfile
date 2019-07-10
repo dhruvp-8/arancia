@@ -22,10 +22,7 @@ Vagrant.configure("2") do |config|
 
     # This is required because we are using gitfs as the backend
     # for the salt provisioner defined below.
-    config.vm.provision "shell", inline: <<-SHELL
-       apt-get update
-       sudo apt-get -y install python-git
-    SHELL
+    config.vm.provision "shell", path: "bootstrap.sh"
 
     config.vm.provision :salt do |salt|
         salt.run_highstate = true
