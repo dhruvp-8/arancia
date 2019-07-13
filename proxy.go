@@ -8,8 +8,12 @@ import (
 )
 
 func main() {
-	fmt.Println("Hello, World!")
-    proxy := goproxy.NewProxyHttpServer()
-    proxy.Verbose = true
+	proxy := goproxy.NewProxyHttpServer()
+	proxy.Verbose = true
+	proxy.OnRequest().DoFunc(
+    func(r *http.Request,ctx *goproxy.ProxyCtx)(*http.Request,*http.Response) {
+        fmt.Println(r.Method)
+        return r,nil
+    })
     log.Fatal(http.ListenAndServe(":7000", proxy))
 }
