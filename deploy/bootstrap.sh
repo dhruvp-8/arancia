@@ -6,6 +6,7 @@ sudo apt-get -y install nginx
 
 # Install the python-git client for salt to get the config from the repo
 sudo apt-get -y install python-git
+sudo apt install -y python3-pip
 
 # Install Basic Tools
 sudo DEBIAN_FRONTEND=noninteractive apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confnew" install git
