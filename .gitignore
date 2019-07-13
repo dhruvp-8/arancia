@@ -7,6 +7,7 @@
 
 # Remove Vagrant bash_profile
 **.bash_profile
+**.profile
 
 # Vagrant stuff
 **/deploy/acceptance_config.yml
