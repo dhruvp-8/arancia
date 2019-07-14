@@ -8,8 +8,18 @@ from flask import Flask, jsonify
 from flask import request
 from send_email import publish
 
+from werkzeug.routing import BaseConverter
+
 # Initialize the Flask Application
 application = Flask(__name__)
+
+# Creating a generic log method for short writes
+def log(message):
+    return application.logger.info(message)
+
+# Creating a generic log method for errors
+def error(message):
+    return application.logger.error(message)
 
 # Initialize Firebase
 def initDB():
@@ -25,19 +35,21 @@ def initDB():
     auth = firebase.auth()
     return db
 
+db = initDB()
+
+# Implement a RegexConvertor regex based routing in Flask
+class RegexConverter(BaseConverter):
+    def __init__(self, url_map, *items):
+        super(RegexConverter, self).__init__(url_map)
+        self.regex = items[0]
+
+application.url_map.converters['regex'] = RegexConverter
+
 # Set the logging rules for gunicorn
 if __name__ != "__main__":
     gunicorn_logger = logging.getLogger("gunicorn.error")
     application.logger.handlers = gunicorn_logger.handlers
     application.logger.setLevel(gunicorn_logger.level)
-
-# Creating a generic log method for short writes
-def log(message):
-    return application.logger.info(message)
-
-# Creating a generic log method for errors
-def error(message):
-    return application.logger.error(message)
 
 # Hash password for storing
 def hash_password(password):
@@ -82,8 +94,6 @@ def create_account():
         "active": False
     }
 
-    db = initDB()
-
     try:
         results = db.child("users").push(data)
         token = str(uuid.uuid1())
@@ -112,9 +122,28 @@ def create_account():
         except Exception as e:
             error(str(e))
             return jsonify({"error": str(e)})
-    except Excetion as e:
+    except Exception as e:
         error(str(e))
         return jsonify({"error": str(e)})
+
+# Update the active status of the user
+def updateUser(email):
+    all_users = db.child("users").get()
+    for userKey in all_users.each():
+        if userKey.val()["email"] == email:
+            db.child("users").child(userKey.key()).update({"active": True})
+
+@application.route('/verify_account/<regex("[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}"):uid>')
+def verify_account(uid):
+    all_tokens = db.child("auth_tokens").get()
+    if all_tokens.val():
+        for gKey in all_tokens.each():
+            for token, email in gKey.val().items():
+                if token == uid: 
+                    updateUser(email)
+                    db.child("auth_tokens").child(gKey.key()).remove()       
+                    return json.dumps({"success": "Your email address is successfully verified. You can now start exploring AranciaDB"})
+    return json.dumps({"error": "Invalid token."})
 
 @application.route("/")
 def hello():
