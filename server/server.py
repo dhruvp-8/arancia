@@ -59,7 +59,7 @@ def hash_password(password):
     pwdhash = binascii.hexlify(pwdhash)
     return (salt + pwdhash).decode('ascii')
 
-# Verify password after retreiving
+# Verify password after retrieving
 def verify_password(stored_password, provided_password):
     salt = stored_password[:64]
     stored_password = stored_password[64:]
@@ -142,8 +142,44 @@ def verify_account(uid):
                 if token == uid: 
                     updateUser(email)
                     db.child("auth_tokens").child(gKey.key()).remove()       
-                    return json.dumps({"success": "Your email address is successfully verified. You can now start exploring AranciaDB"})
-    return json.dumps({"error": "Invalid token."})
+                    return jsonify({"success": "Your email address is successfully verified. You can now start exploring AranciaDB"})
+    return jsonify({"error": "Invalid token."})
+
+
+@application.route('/resend_token', methods = ["POST"])
+def resend_token():
+    email = request.form.get("email")
+    password = request.form.get("password")
+
+    all_users = db.child("users").get()
+    for userKey in all_users.each():
+        if userKey.val()["email"] == email and verify_password(userKey.val()["password"], password):
+            token = str(uuid.uuid1())
+            token_data = {token: email}
+            url = "http://localhost:8000/verify_account/" + token 
+            body = """\
+            <html>
+            <body>
+                <p>Hi,<br>
+                Please verify your email in order to start using AranciaDB<br>
+                <a href='""" + url + """'>"""+ url +"""</a> 
+                </p>
+            </body>
+            </html>
+            """
+            subject = "Verify your account with AranciaDB"
+            try: 
+                publish(email, subject, body)
+                try:
+                    response = db.child("auth_tokens").push(token_data)
+                    return jsonify({"success": "New verification link has been sent to your email address."})
+                except Exception as e:
+                    error(str(e))
+                    return jsonify({"error": str(e)})
+            except Exception as e:
+                error(str(e))
+                return jsonify({"error": str(e)})
+    return jsonify({"error": "Invalid Email/Password."})
 
 @application.route("/")
 def hello():
