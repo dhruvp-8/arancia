@@ -70,11 +70,17 @@ workon <NAME_OF_ENV>
 
 Similarly, install all the prerequisites.
 
-
 ## Running the tests
 
-No Tests to show currently.
+Use this command from root directory to start the Go Proxy server 
+```
+go run proxy.go
+```
 
+Use this command from /server to start the Gunicorn Server
+```
+gunicorn --bind=0.0.0.0:8000 --log-level=debug wsgi --reload
+```
 
 ## Deployment
 
