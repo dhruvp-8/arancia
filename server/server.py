@@ -70,6 +70,23 @@ def verify_password(stored_password, provided_password):
     pwdhash = binascii.hexlify(pwdhash).decode('ascii')
     return pwdhash == stored_password
 
+# Check if the user already exists in the users table
+def check_if_user_already_exists_in_users(email):
+    all_users = db.child("users").get()
+    for userKey in all_users.each():
+        if userKey.val()["email"] == email:
+            return True
+    return False
+
+# Check if the user already exists in the auth_tokens table
+def check_if_user_already_exists_in_auth_tokens(given_email):
+    all_tokens = db.child("auth_tokens").get()
+    if all_tokens.val():
+        for gKey in all_tokens.each():
+            for token, email in gKey.val().items():
+                if email == given_email:
+                    return True
+    return False
 
 # Create a user who can access this DB
 @application.route("/create_account", methods = ["POST"])
@@ -86,45 +103,47 @@ def create_account():
 
     if not password:
         return jsonify({"error": "Password cannot be empty"})
-    
-    data = {
-        "name": name,
-        "email": email,
-        "password": hash_password(password),
-        "active": False
-    }
 
-    try:
-        results = db.child("users").push(data)
-        token = str(uuid.uuid1())
-        url = "http://localhost:8000/verify_account/" + token 
-        body = """\
-        <html>
-        <body>
-            <p>Hi,<br>
-            Please verify your email in order to start using AranciaDB<br>
-            <a href='""" + url + """'>"""+ url +"""</a> 
-            </p>
-        </body>
-        </html>
-        """
-        subject = "Verify your account with AranciaDB"
+    if not check_if_user_already_exists_in_users(email):
+        data = {
+            "name": name,
+            "email": email,
+            "password": hash_password(password),
+            "active": False
+        }
 
         try:
-            publish(email, subject, body)
-            token_data = {token: email}
+            results = db.child("users").push(data)
+            token = str(uuid.uuid1())
+            url = "http://localhost:8000/verify_account/" + token 
+            body = """\
+            <html>
+            <body>
+                <p>Hi,<br>
+                Please verify your email in order to start using AranciaDB<br>
+                <a href='""" + url + """'>"""+ url +"""</a> 
+                </p>
+            </body>
+            </html>
+            """
+            subject = "Verify your account with AranciaDB"
+
             try:
-                response = db.child("auth_tokens").push(token_data)
-                return jsonify({"success": "Created the DB account. Please verify the email to access it"})
+                publish(email, subject, body)
+                token_data = {token: email}
+                try:
+                    response = db.child("auth_tokens").push(token_data)
+                    return jsonify({"success": "Created the DB account. Please verify the email to access it"})
+                except Exception as e:
+                    error(str(e))
+                    return jsonify({"error": str(e)})
             except Exception as e:
                 error(str(e))
                 return jsonify({"error": str(e)})
         except Exception as e:
             error(str(e))
             return jsonify({"error": str(e)})
-    except Exception as e:
-        error(str(e))
-        return jsonify({"error": str(e)})
+    return jsonify({"error": "This email already exists, please select a new email address"})
 
 # Update the active status of the user
 def updateUser(email):
@@ -151,35 +170,37 @@ def resend_token():
     email = request.form.get("email")
     password = request.form.get("password")
 
-    all_users = db.child("users").get()
-    for userKey in all_users.each():
-        if userKey.val()["email"] == email and verify_password(userKey.val()["password"], password):
-            token = str(uuid.uuid1())
-            token_data = {token: email}
-            url = "http://localhost:8000/verify_account/" + token 
-            body = """\
-            <html>
-            <body>
-                <p>Hi,<br>
-                Please verify your email in order to start using AranciaDB<br>
-                <a href='""" + url + """'>"""+ url +"""</a> 
-                </p>
-            </body>
-            </html>
-            """
-            subject = "Verify your account with AranciaDB"
-            try: 
-                publish(email, subject, body)
-                try:
-                    response = db.child("auth_tokens").push(token_data)
-                    return jsonify({"success": "New verification link has been sent to your email address."})
+    if not check_if_user_already_exists_in_auth_tokens(email):
+        all_users = db.child("users").get()
+        for userKey in all_users.each():
+            if userKey.val()["email"] == email and verify_password(userKey.val()["password"], password):
+                token = str(uuid.uuid1())
+                token_data = {token: email}
+                url = "http://localhost:8000/verify_account/" + token 
+                body = """\
+                <html>
+                <body>
+                    <p>Hi,<br>
+                    Please verify your email in order to start using AranciaDB<br>
+                    <a href='""" + url + """'>"""+ url +"""</a> 
+                    </p>
+                </body>
+                </html>
+                """
+                subject = "Verify your account with AranciaDB"
+                try: 
+                    publish(email, subject, body)
+                    try:
+                        response = db.child("auth_tokens").push(token_data)
+                        return jsonify({"success": "New verification link has been sent to your email address."})
+                    except Exception as e:
+                        error(str(e))
+                        return jsonify({"error": str(e)})
                 except Exception as e:
                     error(str(e))
                     return jsonify({"error": str(e)})
-            except Exception as e:
-                error(str(e))
-                return jsonify({"error": str(e)})
-    return jsonify({"error": "Invalid Email/Password."})
+        return jsonify({"error": "Invalid Email/Password."})
+    return jsonify({"error": "You cannot generate duplicate tokens."})
 
 @application.route("/")
 def hello():
