@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+    "fmt"
     "github.com/elazarl/goproxy"
     "log"
     "net/http"
@@ -13,7 +13,8 @@ func main() {
 	proxy.OnRequest().DoFunc(
     func(r *http.Request,ctx *goproxy.ProxyCtx)(*http.Request,*http.Response) {
         fmt.Println(r.Method)
-        return r,nil
+        r.Header.Set("X-GoProxy","yxorPoG-X")
+        return r, nil
     })
     log.Fatal(http.ListenAndServe(":7000", proxy))
 }

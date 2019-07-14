@@ -1,3 +1,6 @@
+# Remove config.json which stores all "secret" stuff
+**/server/config.json
+
 # OS-specific
 **.DS_Store
 
