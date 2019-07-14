@@ -82,6 +82,8 @@ Use this command from /server to start the Gunicorn Server
 gunicorn --bind=0.0.0.0:8000 --log-level=debug wsgi --reload
 ```
 
+**API Calls with documentation will be updated soon. Moreover how to use CURL or POSTMAN to send the request shall be explained.**
+
 ## Deployment
 
 Not Deployed.
