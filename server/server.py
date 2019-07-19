@@ -22,6 +22,31 @@ with open('config.json', 'r') as outfile:
     pyConfig = json.load(outfile)
 application.config['SECRET_KEY'] = pyConfig["secret_key"]
 
+# Decorator for token authentication
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        token = request.args.get('token')
+
+        if not token:
+            return jsonify({'error': 'Token is missing'}), 403
+
+        try:
+            data = jwt.decode(token, application.config['SECRET_KEY'])
+            email = data['user']
+
+            all_users = db.child("users").get()
+            for userKey in all_users.each():
+                if userKey.val()["email"] == email and userKey.val()["token"] == token:
+                    return f(*args, **kwargs)
+            return jsonify({'error': 'Your token does not match with our records'}), 403
+        except Exception as e:
+            error(str(e))
+            return jsonify({'error': 'Token is invalid'}), 403
+
+        return f(*args, **kwargs)
+    return decorated
+
 # Creating a generic log method for short writes
 def log(message):
     return application.logger.info(message)
@@ -32,10 +57,6 @@ def error(message):
 
 # Initialize Firebase
 def initDB():
-    pyConfig = {}
-    with open('config.json', 'r') as outfile:
-        pyConfig = json.load(outfile)
-
     config = pyConfig["firebaseConfig"]
     log(json.dumps(config))
 
@@ -238,6 +259,15 @@ def create_access_tokens():
         return jsonify({"token": token.decode('utf-8')})
     else:
         return jsonify({"error": result})
+
+@application.route("/unprotected")
+def unprotected():
+    return jsonify({"message": "Anyone can access this route"})
+
+@application.route("/protected")
+@token_required
+def protected():
+    return jsonify({"message": "Available for only those who have valid tokens"})
 
 @application.route("/")
 def hello():
