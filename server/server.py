@@ -17,7 +17,10 @@ from werkzeug.routing import BaseConverter
 application = Flask(__name__)
 
 # App Config for Secret Key
-application.config['SECRET_KEY'] = "thisisthesecretkey"
+pyConfig = {}
+with open('config.json', 'r') as outfile:
+    pyConfig = json.load(outfile)
+application.config['SECRET_KEY'] = pyConfig["secret_key"]
 
 # Creating a generic log method for short writes
 def log(message):
