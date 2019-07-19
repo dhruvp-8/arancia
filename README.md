@@ -55,7 +55,7 @@ mkvirtualenv --python=python3 <NAME_OF_ENV>
 
 Install the python dependencies
 ```
-pip3 install requirements.txt
+pip3 install -r requirements.txt
 ```
 
 Use this command to deactivate the python virtual environment

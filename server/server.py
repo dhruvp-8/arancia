@@ -3,6 +3,9 @@ import logging
 import hashlib, binascii, os
 import pyrebase
 import uuid, json
+import jwt
+import datetime
+from functools import wraps
 
 from flask import Flask, jsonify
 from flask import request
@@ -12,6 +15,9 @@ from werkzeug.routing import BaseConverter
 
 # Initialize the Flask Application
 application = Flask(__name__)
+
+# App Config for Secret Key
+application.config['SECRET_KEY'] = "thisisthesecretkey"
 
 # Creating a generic log method for short writes
 def log(message):
@@ -201,6 +207,34 @@ def resend_token():
                     return jsonify({"error": str(e)})
         return jsonify({"error": "Invalid Email/Password."})
     return jsonify({"error": "You cannot generate duplicate tokens."})
+
+
+def check_if_email_password_match(email, password):
+    all_users = db.child("users").get()
+    for userKey in all_users.each():
+        if userKey.val()["email"] == email and verify_password(userKey.val()["password"], password):
+            if not userKey.val()["active"]:
+                return "User is not active"
+            return "Success"
+    return "Invalid Email/Password."
+
+@application.route("/create_access_tokens", methods = ["POST"])
+def create_access_tokens():
+    email = request.form.get("email")
+    password = request.form.get("password")
+
+    result = check_if_email_password_match(email, password)
+    if result == "Success":
+        token = jwt.encode({'user': email, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes = 30)}, application.config['SECRET_KEY'])
+
+        all_users = db.child("users").get()
+        for userKey in all_users.each():
+            if userKey.val()["email"] == email:
+                db.child("users").child(userKey.key()).update({"token": token.decode('utf-8')})
+
+        return jsonify({"token": token.decode('utf-8')})
+    else:
+        return jsonify({"error": result})
 
 @application.route("/")
 def hello():
