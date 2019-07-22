@@ -12,6 +12,7 @@ from flask import request
 from send_email import publish
 
 from werkzeug.routing import BaseConverter
+from file_handler import FileHandler
 
 # Initialize the Flask Application
 application = Flask(__name__)
@@ -27,7 +28,6 @@ def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         token = request.args.get('token')
-
         if not token:
             return jsonify({'error': 'Token is missing'}), 403
 
@@ -43,7 +43,6 @@ def token_required(f):
         except Exception as e:
             error(str(e))
             return jsonify({'error': 'Token is invalid'}), 403
-
         return f(*args, **kwargs)
     return decorated
 
@@ -260,14 +259,14 @@ def create_access_tokens():
     else:
         return jsonify({"error": result})
 
-@application.route("/unprotected")
-def unprotected():
-    return jsonify({"message": "Anyone can access this route"})
-
-@application.route("/protected")
+@application.route("/create_db", methods = ["POST"])
 @token_required
-def protected():
-    return jsonify({"message": "Available for only those who have valid tokens"})
+def create_db():
+    db_name = request.args.get("db_name")
+    fh = FileHandler()
+    if fh.create_folder(db_name):
+        return jsonify({"success": "Successfully created a db with name " + db_name})
+    return jsonify({"error": "Cannot create a db with name " + db_name + " because it already exists."})
 
 @application.route("/")
 def hello():
