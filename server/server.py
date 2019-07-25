@@ -181,6 +181,7 @@ def updateUser(email):
         if userKey.val()["email"] == email:
             db.child("users").child(userKey.key()).update({"active": True})
 
+
 @application.route('/verify_account/<regex("[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}"):uid>')
 def verify_account(uid):
     all_tokens = db.child("auth_tokens").get()
@@ -248,7 +249,7 @@ def create_access_tokens():
 
     result = check_if_email_password_match(email, password)
     if result == "Success":
-        token = jwt.encode({'user': email, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes = 30)}, application.config['SECRET_KEY'])
+        token = jwt.encode({'user': email, 'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes = 30000)}, application.config['SECRET_KEY'])
 
         all_users = db.child("users").get()
         for userKey in all_users.each():
@@ -264,7 +265,19 @@ def create_access_tokens():
 def create_db():
     db_name = request.args.get("db_name")
     fh = FileHandler()
-    if fh.create_folder(db_name):
+
+    token = request.args.get('token')
+    data = jwt.decode(token, application.config['SECRET_KEY'])
+    email = data['user']
+
+    unique_id = ""
+    all_users = db.child("users").get()
+    for userKey in all_users.each():
+        if userKey.val()["email"] == email:
+            unique_id = userKey.key()
+            break
+
+    if fh.create_folder(unique_id, db_name):
         return jsonify({"success": "Successfully created a db with name " + db_name})
     return jsonify({"error": "Cannot create a db with name " + db_name + " because it already exists."})
 
