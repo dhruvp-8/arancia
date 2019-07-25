@@ -16,11 +16,21 @@ class FileHandler:
     
     def create_folder(self, unique_id, folder_name):
         if not self.check_if_a_folder_exists(self.root, unique_id):
-            os.mkdir("../db/" + unique_id)
+            os.mkdir(self.root + "/" + unique_id)
         
         if not self.check_if_a_folder_exists(self.root + "/" + unique_id, folder_name):
-            os.mkdir("../db/" + unique_id + "/" + folder_name)
+            os.mkdir(self.root + "/" + unique_id + "/" + folder_name)
             return True
         return False
+    
+    def create_folder_for_table(self, unique_id, table_name, db_name):
+        if self.check_if_a_folder_exists(self.root, unique_id):
+            if self.check_if_a_folder_exists(self.root + "/" + unique_id, db_name):
+                if not self.check_if_a_folder_exists(self.root + "/" + unique_id + "/" + db_name, table_name):
+                    os.mkdir(self.root + "/" + unique_id + "/" + db_name + "/" + table_name)
+                    return {"msg": "Successfully created the table", "flag": True}
+                return {"msg": "Provided table name already exists in the DB", "flag": False}
+            return {"msg": "Provided DB does not exist", "flag": False}
+        return {"msg": "There are no records for this user, so he cannot create a table", "flag": False}
     
     

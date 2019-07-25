@@ -264,6 +264,10 @@ def create_access_tokens():
 @token_required
 def create_db():
     db_name = request.args.get("db_name")
+
+    if not db_name:
+        return jsonify({"error": "DB Name not provided"})
+
     fh = FileHandler()
 
     token = request.args.get('token')
@@ -280,6 +284,37 @@ def create_db():
     if fh.create_folder(unique_id, db_name):
         return jsonify({"success": "Successfully created a db with name " + db_name})
     return jsonify({"error": "Cannot create a db with name " + db_name + " because it already exists."})
+
+@application.route("/create_table", methods = ["POST"])
+@token_required
+def create_table():
+    db_name = request.args.get("db_name")
+    table_name = request.args.get("table_name")
+
+    if not db_name:
+        return jsonify({"error": "DB Name not provided"})
+    
+    if not table_name:
+        return jsonify({"error": "Table Name not provided"})
+
+    token = request.args.get('token')
+    data = jwt.decode(token, application.config['SECRET_KEY'])
+    email = data['user']
+
+    unique_id = ""
+    all_users = db.child("users").get()
+    for userKey in all_users.each():
+        if userKey.val()["email"] == email:
+            unique_id = userKey.key()
+            break
+    
+    fh = FileHandler()
+    response = fh.create_folder_for_table(unique_id, table_name, db_name)
+    
+    if response["flag"]:
+        return jsonify({"success": response["msg"]})
+    return jsonify({"error": response["msg"]})
+
 
 @application.route("/")
 def hello():
