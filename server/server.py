@@ -158,7 +158,7 @@ def create_account():
             subject = "Verify your account with AranciaDB"
 
             try:
-                publish(email, subject, body)
+                publish.delay(email, subject, body)
                 token_data = {token: email}
                 try:
                     response = db.child("auth_tokens").push(token_data)
@@ -219,7 +219,7 @@ def resend_token():
                 """
                 subject = "Verify your account with AranciaDB"
                 try: 
-                    publish(email, subject, body)
+                    publish.delay(email, subject, body)
                     try:
                         response = db.child("auth_tokens").push(token_data)
                         return jsonify({"success": "New verification link has been sent to your email address."})

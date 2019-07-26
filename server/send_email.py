@@ -1,7 +1,11 @@
 import smtplib, ssl, os, json
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from celery import Celery
 
+app = Celery("send_email_task", broker = "amqp://admin:password@localhost")
+
+@app.task
 def publish(receiver_email, subject, body):
 
     config = {}
