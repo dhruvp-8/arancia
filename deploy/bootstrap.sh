@@ -40,7 +40,7 @@ sudo apt-get install -y rabbitmq-server
 
 sudo systemctl rabbitmq-server enable
 sudo systemctl start rabbitmq-server
-sud0 systemctl status rabbitmq-server
+sudo systemctl status rabbitmq-server
 sudo rabbitmq-plugins enable rabbitmq_management
 sudo rabbitmqctl add_user admin password
 sudo rabbitmqctl set_user_tags admin administrator
