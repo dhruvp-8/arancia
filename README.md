@@ -48,6 +48,11 @@ Folder which has symlink with local machine folder
 cd /vagrant
 ```
 
+Install the Go Library
+```
+go get github.com/elazarl/goproxy
+```
+
 Creates a python3 virtualenv
 ```
 mkvirtualenv --python=python3 <NAME_OF_ENV>
