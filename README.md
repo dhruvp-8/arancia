@@ -4,7 +4,7 @@ This project targets on creating a distributed key-value store based on 2PC prot
 
 ### Prerequisites
 
-What things you need to install the software and how to install them
+What things you need to install to run the software and how to install them
 
 ```
 Vagrant
@@ -18,15 +18,15 @@ virtualbox 5.2.30
 
 ### Installing
 
-A step by step series of examples that tell you have to get a development env running
+A step by step series of examples that tell you how to get a development env running
 
 
 ```
-Install the Vagrant using the download link
+Install Vagrant using the download link
 ```
 
 ```
-Install virtualbox using the download link
+Install Virtualbox using the download link
 ```
 
 ```
