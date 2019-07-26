@@ -5,6 +5,7 @@ import pyrebase
 import uuid, json
 import jwt
 import datetime
+import re
 from functools import wraps
 
 from flask import Flask, jsonify
@@ -132,6 +133,11 @@ def create_account():
 
     if not password:
         return jsonify({"error": "Password cannot be empty"})
+    
+    match = re.match('^[_a-z0-9-]+(\.[_a-z0-9-]+)*@[a-z0-9-]+(\.[a-z0-9-]+)*(\.[a-z]{2,4})$', email)
+
+    if match == None:
+        return jsonify({"error": "Invalid email address"})
 
     if not check_if_user_already_exists_in_users(email):
         data = {
