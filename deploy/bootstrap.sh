@@ -31,3 +31,21 @@ printf "export PATH=\$PATH:$GOTARGET/go/bin:$GOPATH/bin\n" >> $PROFILE
 
 # Install Go Compiler
 sudo apt-get -y install gccgo-go
+
+# Install RabbitMQ
+sudo apt-get update
+sudo apt-get upgrade
+sudo apt-get install -y erlang
+sudo apt-get install -y rabbitmq-server
+
+sudo systemctl rabbitmq-server enable
+sudo systemctl start rabbitmq-server
+sud0 systemctl status rabbitmq-server
+sudo rabbitmq-plugins enable rabbitmq_management
+sudo rabbitmqctl add_user admin password
+sudo rabbitmqctl set_user_tags admin administrator
+sudo rabbitmqctl set_permissions -p / admin ".*" ".*" ".*"
+sudo rabbitmqctl delete_user guest
+
+
+
