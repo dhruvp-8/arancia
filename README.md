@@ -2,6 +2,9 @@
 
 This project targets on creating a distributed key-value store based on 2PC protocol with consistent hashing in order to maintain data consistency and high availability. 
 
+### Architecture
+![Alt text](./AranciaDB.jpg "AranciaDB Architecture")
+
 ### Prerequisites
 
 What things you need to install to run the software and how to install them
