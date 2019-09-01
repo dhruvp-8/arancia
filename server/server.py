@@ -291,6 +291,7 @@ def create_db():
         return jsonify({"success": "Successfully created a db with name " + db_name})
     return jsonify({"error": "Cannot create a db with name " + db_name + " because it already exists."})
 
+
 @application.route("/create_table", methods = ["POST"])
 @token_required
 def create_table():
