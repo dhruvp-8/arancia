@@ -97,6 +97,10 @@ celery -A send_email worker --loglevel=info
 
 **API Calls with documentation will be updated soon. Moreover how to use CURL or POSTMAN to send the request shall be explained.**
 
+## Performance
+
+Performance Benchmarking tool was created with a support from RocksDB OpenSource Foundations
+
 ## Deployment
 
 Not Deployed.
