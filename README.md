@@ -99,7 +99,7 @@ celery -A send_email worker --loglevel=info
 
 ## Performance
 
-Performance Benchmarking tool was created with a support from RocksDB OpenSource Foundations
+The performance benchmarking tool was created with support from the RocksDB Open Source Foundation
 
 ## Deployment
 
@@ -107,7 +107,7 @@ Not Deployed.
 
 ## Versioning
 
-I use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/dhruvp-8). 
+I use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/dhruvp-8/arancia/tags).
 
 ## Authors
 

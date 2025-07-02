@@ -247,9 +247,11 @@ func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
       // 204, all good
       w.WriteHeader(204)
+      return
     }
 
     // 304, already balanced
     w.WriteHeader(304)
+    return
   }
 }

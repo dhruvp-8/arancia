@@ -55,3 +55,12 @@ func Test_fromToRecord(t *testing.T) {
   fromToRecordExample(t, Record{[]string{"hello"}, NO}, "hello")
   fromToRecordExample(t, Record{[]string{"hello"}, SOFT}, "DELETEDhello")
 }
+
+func Test_fromRecordHardDeletePanics(t *testing.T) {
+  defer func() {
+    if r := recover(); r == nil {
+      t.Fatal("expected panic on HARD delete")
+    }
+  }()
+  fromRecord(Record{[]string{"vol"}, HARD})
+}
