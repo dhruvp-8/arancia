@@ -4,6 +4,9 @@ import os
 class FileHandler:
     def __init__(self):
         self.root = "../db"
+        # ensure that the root directory exists so that subsequent
+        # os.listdir calls do not raise FileNotFoundError
+        os.makedirs(self.root, exist_ok=True)
 
     def get_immediate_subdirectories(self, path):
         return [name for name in os.listdir(path) if os.path.isdir(os.path.join(path, name))]
